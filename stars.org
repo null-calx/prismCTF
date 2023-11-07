@@ -1,0 +1,63 @@
+#+TITLE: stars
+#+AUTHOR: calx
+
+* Challenge
+
+** Files
+
+[[./stars.zip]]
+
+** Description
+
+20C2
+
+** Flag
+
+~prism{altair_deneb_vega}~
+
+* Solution
+
+#+begin_src sh
+  composite random_pixels_7.png random_pixels_17.png -compose Exclusion flag.png
+#+end_src
+
+Filename: ~random_pixels_7.png~
+
+[[./random_pixels_7.png]]
+
+Filename: ~random_pixels_17.png~
+
+[[./random_pixels_17.png]]
+
+File created after XOR both images.
+
+[[./flag.png]]
+
+** Observation
+
+1. File 17 was the smallest.
+
+   #+begin_example
+     $ wc *
+	 11    408   9555 random_pixels_1.png
+	  8    397   9507 random_pixels_10.png
+	  6    389   9505 random_pixels_11.png
+	  7    380   9473 random_pixels_12.png
+	 10    396   9566 random_pixels_13.png
+	  7    394   9409 random_pixels_14.png
+	  7    413   9613 random_pixels_15.png
+	  6    388   9599 random_pixels_16.png
+	 11     54   2471 random_pixels_17.png
+	  7    383   9551 random_pixels_18.png
+	 13    401   9479 random_pixels_19.png
+	  8    393   9635 random_pixels_2.png
+	 10    380   9574 random_pixels_20.png
+	 11    407   9505 random_pixels_3.png
+	 11    390   9551 random_pixels_4.png
+	 16    369   9495 random_pixels_5.png
+	  9    385   9525 random_pixels_6.png
+	 13    407   9550 random_pixels_7.png
+	 10    415   9545 random_pixels_8.png
+	 11    387   9495 random_pixels_9.png
+	192   7536 183603 total
+   #+end_example

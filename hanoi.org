@@ -1,0 +1,241 @@
+#+TITLE: hanoi
+#+AUTHOR: calx
+
+* Challenge
+
+** File
+
+#+begin_src typescript
+  #!/usr/bin/env -S deno run
+
+  const flag: string = "prism{spiderm0nkey_or_v8?_i_use_chakra}";
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const buf = new Uint8Array(1);
+
+  const prompt: string = "> ";
+  const banner: string = `=== TOWER OF HANOI ===
+
+  The Tower of Hanoi is a mathematical game or puzzle consisting of
+  three rods and a number of disks of various diameters, which can slide
+  onto any rod. The puzzle begins with the disks stacked on one rod in
+  order of decreasing size, the smallest at the top, thus approximating
+  a conical shape. The objective of the puzzle is to move the entire
+  stack to one of the other rods, obeying the following rules:
+
+    1. Only one disk may be moved at a time.
+
+    2. Each move consists of taking the upper disk from one of the
+       stacks and placing it on top of another stack or on an empty rod.
+
+    3. No disk may be placed on top of a disk that is smaller than it.
+
+  With three disks, the puzzle can be solved i seven moves. The minimal
+  number of moves required to solve a Tower of Hanoi puzzle is \`2^n −
+  1', where \`n' is the number of disks.
+
+  == HOW TO PLAY ==
+
+  The 3 rods available to you are named \`A', \`B', and \`C'. You can
+  use one of the \`(', \`)', \`[', \`]', \`+', and \`!' characters to
+  move the disks between the rods, as listed in the table below. You can
+  also make a string of these characters to make the moves in
+  succession.
+
+  Once you move all 256 disks from rod \`A' to rod \`C', you win.
+
+  | MOVE | FROM > TO |
+  |------+-----------|
+  |    ( |   A > B   |
+  |    ) |   A > C   |
+  |    [ |   B > A   |
+  |    ] |   B > C   |
+  |    + |   C > A   |
+  |    ! |   C > B   |
+  `;
+
+  async function win() {
+      await print(flag);
+  }
+
+  async function print(string: string = "", newline:boolean = true) {
+      const text = encoder.encode(string + (newline ? "\n" : ""));
+      await Deno.stdout.write(text);
+  }
+
+  async function scan(): string {
+      await print(prompt, false);
+      let result: string = "";
+      while (true) {
+	  const n = await Deno.stdin.read(buf);
+	  if (!n || buf[0] === 10) break;
+	  result += decoder.decode(buf.subarray(0, n));
+      }
+      return result;
+  }
+
+  function check(string: string): boolean {
+      for (const char of string)
+	  if (!"()+[]!".includes(char))
+	      return false;
+      return true;
+  }
+
+  class Stack {
+      private name: string;
+      private array: number[];
+
+      constructor(name: string) {
+	  this.name = name;
+	  this.array = [];
+      }
+
+      canAccept(num: number): boolean {
+	  return num && (this.peek() > num || !this.size());
+      }
+
+      push(num: number): boolean {
+	  if (this.canAccept(num)) {
+	      // only push if last element is bigger
+	      this.array.push(num);
+	      return true;
+	  }
+	  return false;
+      }
+
+      peek(): number | null {
+	  if (this.array.length) {
+	      return this.array[this.array.length - 1];
+	  }
+	  return null;
+      }
+
+      pop(): number | null {
+	  if (this.array.length) {
+	      return this.array.pop();
+	  }
+	  return null;
+      }
+
+      size(): number {
+	  return this.array.length;
+      }
+
+      toString(): string {
+	  if (!this.size())
+	      return ` ${ this.name } | empty`;
+	  return ` ${ this.name } | (${ this.array.join(") (") })`;
+      }
+  }
+
+  class Game {
+      private a: Stack
+      private b: Stack;
+      private c: Stack;
+      private stacks: { [ "a" | "b" | "c" ]: Stack };
+      private fill: number;
+
+      constructor(fill: number = 256) {
+	  this.a = new Stack("A");
+	  this.b = new Stack("B");
+	  this.c = new Stack("C");
+	  this.stacks = { a: this.a, b: this.b, c: this.c };
+	  this.fill = fill;
+	  for (let i = fill; i > 0; -- i) {
+	      this.a.push(i);
+	  }
+      }
+
+      hasWon(): boolean {
+	  return this.c.size() === this.fill;
+      }
+
+      move(from, to): boolean {
+	  if (!from in this.stacks || !to in this.stacks)
+	      return false;
+	  if (from === to)
+	      return true;
+	  if (this.stacks[to].canAccept(this.stacks[from].peek())) {
+	      this.stacks[to].push(this.stacks[from].pop());
+	  }
+      }
+
+      play(move): void {
+	  switch (move) {
+	      case "(":
+		  this.move("a", "b");
+		  break;
+	      case ")":
+		  this.move("a", "c");
+		  break;
+	      case "[":
+		  this.move("b", "a");
+		  break;
+	      case "]":
+		  this.move("b", "c");
+		  break;
+	      case "+":
+		  this.move("c", "a");
+		  break;
+	      case "!":
+		  this.move("c", "b");
+		  break
+	      default:
+		  //// 6(^_^)9 ////
+	  }
+      }
+
+      playString(moves): void {
+	  try{eval(eval(moves))}catch(e){}
+	  for (const move of moves) {
+	      this.play(move);
+	  }
+      }
+
+      toString(): string {
+	  return [ this.a, this.b, this.c ].join("\n");
+      }
+  }
+
+  async function interact() {
+      const game = new Game();
+      await print(game);
+      while (!game.hasWon()) {
+	  await print();
+	  const userinput = await scan();
+	  if (check(userinput))
+	      game.playString(userinput);
+	  await print(game);
+      }
+  }
+
+  await print(banner)
+      .then(() => interact())
+      .then(() => print())
+      .then(() => win())
+      .then(() => print("Thank you for playing!"))
+      .then(() => print("You've done the impossible!"));
+#+end_src
+
+** Flag
+
+~prism{spiderm0nkey_or_v8?_i_use_chakra}~
+
+* Solution
+
+#+begin_example
+  (+(!+[]+!+[]+!+[]+[!+[]+!+[]]))[(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[+!+[]+[+[]]]+([]+[])[([][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]][([][[]]+[])[+!+[]]+(![]+[])[+!+[]]+((+[])[([][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]+[])[+!+[]+[+!+[]]]+(!![]+[])[!+[]+!+[]+!+[]]]](!+[]+!+[]+!+[]+[!+[]+!+[]+!+[]])+([![]]+[][[]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+([][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]]+[])[+!+[]+[!+[]+!+[]+!+[]]]+([+[]]+![]+[][(![]+[])[+[]]+(![]+[])[!+[]+!+[]]+(![]+[])[+!+[]]+(!![]+[])[+[]]])[!+[]+!+[]+[+[]]]
+#+end_example
+
+** Observation
+
+1. The number of move required to solve this puzzle in correct way is
+   115792089237316195423570985008687907853269984665640564039457584007913129639935.
+   So, there has to be some other method.
+2. The line 182 is: ~try{eval(eval(moves))}catch(e){}~
+3. The line 199 blocks any character other than `()[]+!' to be used.
+
+So, you need to write valid javascript, only using the 6 characters.
+
+[[https://jsfuck.com][JSFuck]]

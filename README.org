@@ -1,0 +1,17 @@
+#+TITLE: PrismCTF Solutions
+#+AUTHOR: calx
+
+solutions to PrismCTF challenges i wrote
+
+** misc
+
+1. [[./cjail.org][cjail]]
+2. [[./monster.org][monster]]
+3. [[./numbers.org][numbers]]
+4. [[./stars.org][stars]]
+5. [[./abstract-space.org][abstract-space]]
+6. [[./hanoi.org][hanoi]]
+
+** web
+
+1. [[./akari.org][akari]]

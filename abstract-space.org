@@ -1,0 +1,267 @@
+#+TITLE: abstract-space
+#+AUTHOR: calx
+
+* Challenge
+
+** File
+
+#+begin_src lisp
+  (defparameter *story* "Hello captain!
+  Welcome back to the spaceship!
+
+  I'm am your assistant, EMALINE! Wait, did I make a grammatical
+  mistake? That's impossible! I totally did not, not correct it for the
+  special effects! It looks like my programming is breaking bad here! We
+  need to escape out of this...
+
+  [futuristic AI analysis sounds]
+
+  ...this 4-dimensional \"abyss of darkness\"...
+
+  [a dramatic sound of thunder]
+
+  ...This feels like we're stuck in 4D backroom in the shape of a
+  hypercube. Just like last monday, lol.
+
+  Okay! Yeah! So! Hmm!
+
+  According to the TVA manual, \"the only way to escape out of backrooms
+  is with the proper communication of a human and an AI over `netcat'\".
+  Well! That's quite convinient, isn't it? It feels like some one is
+  just sitting in their room and writting all this to fit in
+  conviniently like a happy story. Aww! Isn't that cute? I praise the
+  `One Who Writes' for their hard work.
+
+  [ happy narrator 6(^_^)9 sounds ]
+
+  for Just The Two Of Us to escape, you need to guess the exit point in
+  this 4D space. Why am I not guessing, you ask? Because we were
+  instructed not steal your jobs, in the near future. You will give me
+  coordinates in format like
+
+  (352 614 542 542)
+
+  and i will tell you if we're `IN-RANGE' of the exit point,
+  i.e. whether we're inside the hypercube with the center point at exit
+  point, or if we're outside the hypercube by saying `OUT-OF-RANGE'.
+
+  Everytime you give me a coordinate, my battery will drop 1 point,
+  because you know, stuff. Also, giving wrongly formatted coordinated,
+  might or might not discharge me faster, because I am an intelligent
+  AI, and might overanalysis, you know.
+
+  According to my calculations the hypercube is of the size
+  2000x2000x2000x2000. Wow! Such a non-random number! Are we living in a
+  simulation?
+
+  If you guess exactly the exit point or 1 unit up or down, left or
+  right, front or back, past or future. We can exit this Abysmal Abysm.
+  What I mean is there is like a 9x9x9x9 hypercube where if you guess
+  any point inside of the cube, we can exit. Hurray!
+
+  So, let's begin!
+  ")
+
+  (defparameter *happy-ending* "???")
+
+  (defparameter *flag* "prism{???}")
+
+  (defparameter *prompt* "> ")
+
+  (defparameter *dimensions* 4)
+
+  (defparameter *get-random* t)
+
+  (setf *random-state* (make-random-state *get-random*))
+
+  (defparameter *exit-point*
+    (loop for i below *dimensions*
+	  collect (- (random 2001) 1000)))
+
+  (defparameter *grid-radius* 1000)
+
+  (defparameter *start-charge* 250)
+
+  (defun distance (point)
+    (loop for pos in point
+	  for exit-pos in *exit-point*
+	  maximize (abs (- pos exit-pos))))
+
+  (defun disttest (point)
+    (let ((dist (distance point)))
+      (cond ((> dist *grid-radius*)
+	     (values 'out-of-range 1))
+	    ((> dist 2)
+	     (values 'in-range 1))
+	    (t
+	     (values 'success *start-charge*)))))
+
+  (defun test (point)
+    (cond ((not (listp point))
+	   (values 'invalid-format (floor *start-charge* 10)))
+	  ((null point)
+	   (values 'invalid-format (floor *start-charge* 10)))
+	  ((/= (length point) *dimensions*)
+	   (values 'invalid-dimensions (floor *start-charge* 25)))
+	  ((loop for pos in point
+		 if (not (integerp pos))
+		   do (return t)
+		 finally (return nil))
+	   (values 'only-integers-allowed (floor *start-charge* 50)))
+	  (t (disttest point))))
+
+  (defun read-string (stream)
+    (let* ((string (read-line stream nil))
+	   (start 0)
+	   (end (1- (length string))))
+      (unless (zerop (length string))
+	(when (char= (char string start) #\( )
+	  (when (char= (char string end) #\) )
+	    (incf start)
+	    (loop for cursor from start
+		  while (< cursor end)
+		  when (char= (char string cursor) #\Space)
+		    collect (subseq string start cursor) into result
+		    and do (setf start (1+ cursor))
+		  finally (return (nconc result
+					 (list (subseq string start end))))))))))
+
+  (defun read-point (stream)
+    (loop for number-string in (read-string stream)
+	  for number = (parse-integer number-string :junk-allowed t)
+	  if number
+	    collect number
+	  else
+	    collect nil))
+
+  (defun interact (stream)
+    (format stream "~a~%" *story*)
+    ,#+nil(format stream "~a~%" *exit-point*)
+    (format stream "Charge left: ~a~%" *start-charge*)
+    (loop with charge = *start-charge*
+	  while (> charge 0)
+	  do (progn
+	       (format stream "~&~a" *prompt*)
+	       (force-output stream)
+	       (let ((point (read-point stream)))
+		 (multiple-value-bind (status penalty) (test point)
+		   (decf charge penalty)
+		   (format stream "~a (charge-left: ~a)~%"
+			   status (max charge 0))
+		   (if (eq status 'success)
+		       (progn
+			 (format stream "~a~%" *flag*)
+			 (format stream "~a~%" *happy-ending*))))))))
+
+  (interact t)
+#+end_src
+
+** Flag
+
+~prism{h0m3_sweet_emal1ne_h0m3}~
+
+* Solution
+
+You needed to do a binary search for edges in each dimension, and
+finally calculate the center point.
+
+** Sample Run
+
+#+begin_example
+  Charge left: 250
+  > (0 0 0 0)
+  IN-RANGE (charge-left: 249)
+  > (1000 0 0 0)
+  OUT-OF-RANGE (charge-left: 248)
+  > (500 0 0 0)
+  IN-RANGE (charge-left: 247)
+  > (750 0 0 0)
+  OUT-OF-RANGE (charge-left: 246)
+  > (625 0 0 0)
+  OUT-OF-RANGE (charge-left: 245)
+  > (562 0 0 0)
+  OUT-OF-RANGE (charge-left: 244)
+  > (531 0 0 0)
+  IN-RANGE (charge-left: 243)
+  > (546 0 0 0)
+  IN-RANGE (charge-left: 242)
+  > (554 0 0 0)
+  OUT-OF-RANGE (charge-left: 241)
+  > (550 0 0 0)
+  OUT-OF-RANGE (charge-left: 240)
+  > (548 0 0 0)
+  OUT-OF-RANGE (charge-left: 239)
+  > (547 0 0 0)
+  OUT-OF-RANGE (charge-left: 238)
+  > (546 1000 0 0)
+  OUT-OF-RANGE (charge-left: 237)
+  > (546 500 0 0)
+  IN-RANGE (charge-left: 236)
+  > (546 750 0 0)
+  IN-RANGE (charge-left: 235)
+  > (546 875 0 0)
+  IN-RANGE (charge-left: 234)
+  > (546 937 0 0)
+  IN-RANGE (charge-left: 233)
+  > (546 968 0 0)
+  OUT-OF-RANGE (charge-left: 232)
+  > (546 952 0 0)
+  IN-RANGE (charge-left: 231)
+  > (546 960 0 0)
+  OUT-OF-RANGE (charge-left: 230)
+  > (546 956 0 0)
+  IN-RANGE (charge-left: 229)
+  > (546 958 0 0)
+  IN-RANGE (charge-left: 228)
+  > (546 959 0 0)
+  IN-RANGE (charge-left: 227)
+  > (546 959 1000 0)
+  OUT-OF-RANGE (charge-left: 226)
+  > (546 959 500 0)
+  IN-RANGE (charge-left: 225)
+  > (546 959 750 0)
+  OUT-OF-RANGE (charge-left: 224)
+  > (546 959 625 0)
+  OUT-OF-RANGE (charge-left: 223)
+  > (546 959 562 0)
+  IN-RANGE (charge-left: 222)
+  > (546 959 593 0)
+  OUT-OF-RANGE (charge-left: 221)
+  > (546 959 577 0)
+  OUT-OF-RANGE (charge-left: 220)
+  > (546 959 569 0)
+  IN-RANGE (charge-left: 219)
+  > (546 959 573 0)
+  IN-RANGE (charge-left: 218)
+  > (546 959 575 0)
+  IN-RANGE (charge-left: 217)
+  > (546 959 576 0)
+  IN-RANGE (charge-left: 216)
+  > (546 959 576 1000)
+  IN-RANGE (charge-left: 215)
+  > (546 959 576 2000)
+  OUT-OF-RANGE (charge-left: 214)
+  > (546 959 576 1500)
+  IN-RANGE (charge-left: 213)
+  > (546 959 576 1750)
+  OUT-OF-RANGE (charge-left: 212)
+  > (546 959 576 1625)
+  OUT-OF-RANGE (charge-left: 211)
+  > (546 959 576 1562)
+  IN-RANGE (charge-left: 210)
+  > (546 959 576 1607)
+  OUT-OF-RANGE (charge-left: 209)
+  > (546 959 576 1584)
+  IN-RANGE (charge-left: 208)
+  > (546 959 576 1595)
+  OUT-OF-RANGE (charge-left: 207)
+  > (546 959 576 1589)
+  IN-RANGE (charge-left: 206)
+  > (546 959 576 1592)
+  OUT-OF-RANGE (charge-left: 205)
+  > (546 959 576 1590)
+  OUT-OF-RANGE (charge-left: 204)
+  > (-454 -41 -424 590)
+  SUCCESS (charge-left: 0)
+  prism{h0m3_sweet_emal1ne_h0m3}
+#+end_example

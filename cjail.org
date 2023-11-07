@@ -1,0 +1,48 @@
+#+TITLE: cjail
+#+AUTHOR: calx
+
+* Challenge
+
+** File
+
+Filename: ~cjail.c~
+#+begin_src c
+  #include <stdio.h>
+
+  int main() {
+    char* flag = "prism{!_<3_pr!ntf}";
+    char buffer[64];
+
+    fgets(buffer, 64, stdin);
+    printf(buffer);
+    return 0;
+  }
+#+end_src
+
+** Flag
+
+~prism{!_<3_pr!ntf}~
+
+* Solution
+
+#+begin_example
+  %x %x %x %x %x %x %s
+#+end_example
+
+** Observation
+
+1. Userinput is stored in ~buffer~, and is parameter to ~printf~
+   function
+2. ~flag~ variable is in the same scope
+
+** Explaination
+
+1. ~printf~ is a variadic function, i.e. it can accept a variable
+   number of arguments
+2. Arguments for variadic functions are stored on stack
+3. Local variables are also stored on stack
+
+*** Conclusion
+
+~printf~ can be used to read the stack, if user can control the format
+string
