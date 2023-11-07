@@ -7,7 +7,7 @@ Assume host and port: nyx.istaroth.xyz 54321
 
 ** Source Code
 
-[[https://github.com/null-calx/akari.git][akari]] (not public during CTF)
+[[https://github.com/null-calx/akari/tree/623b0f6c5716b37877f5d5eeeec928349a3154a4][akari]] (not public during CTF)
 
 ** Description
 
