@@ -22,4 +22,4 @@ Paytm karo!
 1. make a 33x33 square (1 to 1089)
 2. darken every number in the list
 
-[[./numbers-flag.png]]
+[[./_files/numbers-flag.png][QR]]

@@ -5,7 +5,7 @@
 
 ** Files
 
-[[./stars.zip]]
+[[./_files/stars.zip][stars.zip]]
 
 ** Description
 
@@ -23,15 +23,15 @@
 
 Filename: ~random_pixels_7.png~
 
-[[./random_pixels_7.png]]
+[[./_files/random_pixels_7.png]]
 
 Filename: ~random_pixels_17.png~
 
-[[./random_pixels_17.png]]
+[[./_files/random_pixels_17.png]]
 
 File created after XOR both images.
 
-[[./flag.png]]
+[[./_files/flag.png]]
 
 ** Observation
 
